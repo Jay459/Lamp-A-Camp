@@ -7,8 +7,20 @@ const validate = require("validator");
 exports.signup = async (req, res) => {
   try {
     const pass = req.body.password;
+    const email = req.body.email;
+    const phone = req.body.mobile;
+    if (email) {
+      if (!validate.isEmail(email)) {
+        throw new Error("Invalid Email");
+      }
+    }
     if (pass.length < 7) {
       throw new Error("Password Invalid");
+    }
+    if (phone) {
+      if (!validate.isMobilePhone(phone, "en-IN")) {
+        throw new Error("Invalid Mobile Number");
+      }
     }
     const newUser = await new Admin(req.body);
     const gentoken = await newUser.genAuthToken();
@@ -28,11 +40,20 @@ exports.signup = async (req, res) => {
       res
         .status(409)
         .send("Mobile Number Already Exist Please Try New Credentials");
-    } else if (msg_splitted[11] == "email:") {
+    } 
+    else if (msg_splitted[11] == "email:") {
       res.status(409).send("Email Already Exist Please Try New Credentials");
-    } else if (error.message == "Password Invalid") {
+    } 
+    else if (error.message == "Password Invalid") {
       res.status(409).send("Password Length Must Be Atleast 7 Characters");
-    } else {
+    }
+    else if (error.message == "Invalid Emai") {
+      res.status(409).send(error.message);
+    }
+    else if (error.message == "Invalid Mobile Number") {
+      res.status(409).send(error.message);
+    } 
+    else {
       res.status(409).send(error.message);
     }
   }
